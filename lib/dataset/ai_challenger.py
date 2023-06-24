@@ -103,8 +103,8 @@ class AIDataset(JointsDataset):
                 clean_bbox = [x1, y1, x2-x1, y2-y1]
                 center, scale = self._box2cs(clean_bbox[:4])
                 
-                joints_3d = np.zeros((self.actual_num_joints, 3), dtype=np.float)
-                joints_3d_vis = np.zeros((self.actual_num_joints,  3), dtype=np.float)
+                joints_3d = np.zeros((self.actual_num_joints, 3), dtype=np.float32)
+                joints_3d_vis = np.zeros((self.actual_num_joints,  3), dtype=np.float32)
                 if self.image_set != 'test':
                     joints = np.array(img_anno['keypoint_annotations'][key]).reshape(-1,3)
                     joints_vis = np.array(joints[:,2]<3)

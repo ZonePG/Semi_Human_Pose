@@ -1,4 +1,4 @@
-GPUS: '2'
+GPUS: '0'
 DATA_DIR: '' 
 OUTPUT_DIR: 'output'
 LOG_DIR: 'log'
@@ -6,7 +6,7 @@ LOG_DIR: 'log'
 # Apply Affine Transformation again for hard augmentation
 UNSUP_TRANSFORM: True
 
-WORKERS: 12        
+WORKERS: 0        
 PRINT_FREQ: 100
 CUDNN:
   BENCHMARK: True
@@ -15,7 +15,7 @@ CUDNN:
 DATASET:
   TRAIN_DATASET: mix_coco_coco
   TEST_DATASET: coco
-  ROOT: 'data/'
+  ROOT: '/root/autodl-tmp/data'
   TRAIN_SET: train
   TEST_SET: validation
   FLIP: true
@@ -24,8 +24,9 @@ DATASET:
   TRAIN_LEN: 1000
   
 MODEL:
+  # NAME: pose_dual_coco_gc_controlnet
   NAME: pose_dual
-  PRETRAINED: models/pytorch/imagenet/resnet18_5c_gluon_posedual.pth
+  PRETRAINED: /root/zoupeng/Semi_Human_Pose/models/pytorch/imagenet/resnet18_5c_gluon_posedual.pth
   IMAGE_SIZE:
   - 192
   - 256
@@ -51,7 +52,7 @@ MODEL:
 LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
-  BATCH_SIZE: 32
+  BATCH_SIZE: 64
   SHUFFLE: true
   BEGIN_EPOCH: 0
   END_EPOCH: 30
@@ -68,8 +69,8 @@ TRAIN:
   MOMENTUM: 0.9
   NESTEROV: false
 TEST:
-  MODEL_FILE: 'models/pytorch/pose_dual/COCO_subset/COCO1K_PoseDual.pth.tar'
-  COCO_BBOX_FILE: 'data/coco/person_detection_results/COCO_val2017_detections_AP_H_56_person.json'
+  MODEL_FILE: '/root/zoupeng/Semi_Human_Pose/output/COCO1K_PoseDual_JointCut5.pth.tar'
+  COCO_BBOX_FILE: '/root/autodl-tmp/data/coco/person_detection_results/COCO_val2017_detections_AP_H_56_person.json'
   BBOX_THRE: 1.0
   FLIP_TEST: false
   IMAGE_THRE: 0.0

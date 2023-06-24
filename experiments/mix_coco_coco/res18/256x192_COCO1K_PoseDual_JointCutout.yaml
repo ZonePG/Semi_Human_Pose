@@ -1,4 +1,4 @@
-GPUS: '1'
+GPUS: '0'
 DATA_DIR: '' 
 OUTPUT_DIR: 'output'
 LOG_DIR: 'log'
@@ -13,9 +13,9 @@ CUDNN:
   DETERMINISTIC: False
   ENABLED: True
 DATASET:
-  TRAIN_DATASET: mix_coco_coco
+  TRAIN_DATASET: mix_coco_gc_controlnet
   TEST_DATASET: coco
-  ROOT: 'data/'
+  ROOT: '/root/autodl-tmp/data'
   TRAIN_SET: train
   TEST_SET: validation
   FLIP: true
@@ -24,8 +24,8 @@ DATASET:
   TRAIN_LEN: 1000
   
 MODEL:
-  NAME: pose_dual
-  PRETRAINED: models/pytorch/imagenet/resnet18_5c_gluon_posedual.pth
+  NAME: pose_dual_coco_gc_controlnet
+  PRETRAINED: /root/zoupeng/Semi_Human_Pose/models/pytorch/imagenet/resnet18_5c_gluon_posedual.pth
   IMAGE_SIZE:
   - 192
   - 256
@@ -51,7 +51,7 @@ MODEL:
 LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
-  BATCH_SIZE: 32
+  BATCH_SIZE: 64
   SHUFFLE: true
   BEGIN_EPOCH: 0
   END_EPOCH: 70

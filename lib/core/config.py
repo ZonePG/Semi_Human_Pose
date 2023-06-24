@@ -226,7 +226,7 @@ def _update_dict(k, v):
 def update_config(config_file):
     exp_config = None
     with open(config_file) as f:
-        exp_config = edict(yaml.load(f))
+        exp_config = edict(yaml.safe_load(f))
         for k, v in exp_config.items():
             if k in config:
                 if isinstance(v, dict):
@@ -299,7 +299,7 @@ def get_model_name(cfg):
     name = cfg.MODEL.NAME
     full_name = cfg.MODEL.NAME
     extra = cfg.MODEL.EXTRA
-    if name in ['pose_resnet', 'pose_dual','pose_cons','pose_hrnet']:
+    if name in ['pose_resnet', 'pose_dual','pose_cons','pose_hrnet', 'pose_dual_coco_gc_controlnet']:
         num_layers = extra.NUM_LAYERS  if "NUM_LAYERS" in extra else extra.STAGE2.NUM_CHANNELS[0]
         name = '{model}_{num_layers}'.format(
             model=name,

@@ -97,6 +97,62 @@ class PoseCoLoss(nn.Module):
 
         return loss, loss_dic , pseudo_target
 
+
+class PoseCoLoss_COCO_GC_ControlNet(nn.Module):
+    def __init__(self, use_target_weight, cfg):
+        super(PoseCoLoss_COCO_GC_ControlNet, self).__init__()
+        self.mse_criterion = JointsMSELoss(use_target_weight, cfg)
+
+        self.use_target_weight = use_target_weight
+        
+        self.image_size = cfg.MODEL.IMAGE_SIZE
+        self.target_type = cfg.MODEL.EXTRA.TARGET_TYPE
+        self.heatmap_size = cfg.MODEL.EXTRA.HEATMAP_SIZE
+        self.sigma = cfg.MODEL.EXTRA.SIGMA
+        self.num_joints = 24
+        self.target_type = 'gaussian'
+
+        self.cfg = cfg
+
+    def forward(self, output, target, target_weight, meta):
+        if type(target)==list:
+            sup_target, control_target, unsup_target = target
+            sup_target_weight, control_target_weight, unsup_target_weight = target_weight
+            sup_meta, control_meta, upsup_meta = meta
+        else:
+            sup_target = target
+            sup_target_weight = target_weight
+            sup_meta = meta
+
+        batch_size, joint_num, ht_height, ht_width = sup_target.shape
+        pseudo_target = 0
+
+        sup_ht1,sup_ht2, control_ht1, control_ht2, unsup_ht1, unsup_ht2, unsup_ht_trans1, unsup_ht_trans2, cons_ht1, cons_ht2, out_dic = output 
+
+        batch_size = sup_ht1.size(0)
+        num_joints = sup_ht1.size(1)   
+
+        loss_pose = 0.5*self.mse_criterion(sup_ht1, sup_target, sup_target_weight)
+        loss_pose += 0.5*self.mse_criterion(sup_ht2, sup_target, sup_target_weight)
+
+        loss_control = 0.5*self.mse_criterion(control_ht1, control_target, control_target_weight)
+        loss_control += 0.5*self.mse_criterion(control_ht2, control_target, control_target_weight)
+
+        loss_cons = self.mse_criterion(cons_ht1, unsup_ht_trans2.detach(), unsup_target_weight)
+        loss_cons += self.mse_criterion(cons_ht2, unsup_ht_trans1.detach(),  unsup_target_weight)
+ 
+        pseudo_target = [unsup_ht_trans2.detach().cpu(), unsup_ht_trans1.detach().cpu()]
+
+        loss = loss_pose + loss_cons + 0.6 * loss_control
+        # loss = loss_pose + loss_cons
+        loss_dic = {
+            'loss_pose': loss_pose,
+            'loss_control': loss_control,
+            'loss_cons': loss_cons,
+        }
+
+        return loss, loss_dic , pseudo_target
+
 class PoseDisLoss(nn.Module):
     def __init__(self, use_target_weight, cfg=None):
         super(PoseDisLoss, self).__init__()

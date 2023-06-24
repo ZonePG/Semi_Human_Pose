@@ -13,4 +13,5 @@ import models.pose_resnet
 import models.pose_hrnet
 import models.pose_dual
 import models.pose_cons
+import models.pose_dual_coco_gc_controlnet
 

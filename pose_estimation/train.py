@@ -31,7 +31,7 @@ from core.config import config
 from core.config import update_config
 from core.config import update_dir
 from core.config import get_model_name
-from core.loss import JointsMSELoss, PoseCoLoss, PoseDisLoss
+from core.loss import JointsMSELoss, PoseCoLoss, PoseDisLoss, PoseCoLoss_COCO_GC_ControlNet
 from core.function import train
 from core.function import validate
 from utils.utils import get_optimizer
@@ -168,6 +168,7 @@ def main():
         True,
         train_transforms,
     )
+    train_dataset.__getitem__(1001)
     valid_dataset = eval('dataset.'+config.DATASET.TEST_DATASET)(
         config,
         config.DATASET.ROOT,
@@ -249,6 +250,10 @@ def main():
         criterion = PoseDisLoss(
             use_target_weight=config.LOSS.USE_TARGET_WEIGHT, cfg = config,
         ).cuda()
+    elif config.MODEL.NAME in ['pose_dual_coco_gc_controlnet']:
+        criterion = PoseCoLoss_COCO_GC_ControlNet(
+            use_target_weight=config.LOSS.USE_TARGET_WEIGHT, cfg = config,
+        ).cuda()
 
     optimizer = get_optimizer(config, para)
 
@@ -279,13 +284,12 @@ def main():
 
     for epoch in range(begin_epoch, config.TRAIN.END_EPOCH):
 
-        
-        train(config, train_loader, model, criterion, optimizer, epoch,
-                final_output_dir, tb_log_dir, writer_dict)
-        lr_scheduler.step()
+        # train(config, train_loader, model, criterion, optimizer, epoch,
+        #         final_output_dir, tb_log_dir, writer_dict)
+        # lr_scheduler.step()
 
-        if hasattr(train_loader.dataset, 'shuffle_ind'):
-            train_loader.dataset.shuffle_ind()
+        # if hasattr(train_loader.dataset, 'shuffle_ind'):
+        #     train_loader.dataset.shuffle_ind()
             
         if ((epoch+1) % config.TEST.INTERVAL == 0) or ((epoch+1)==config.TRAIN.END_EPOCH):  
             # evaluate on validation set

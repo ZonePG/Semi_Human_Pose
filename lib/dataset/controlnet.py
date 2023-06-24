@@ -1,10 +1,3 @@
-# ------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
-# Written by Bin Xiao (Bin.Xiao@microsoft.com)
-# Modified by Rongchang Xie (rongchangxie@pku.edu.cn) 
-# ------------------------------------------------------------------------------
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -28,31 +21,8 @@ from nms.nms import oks_nms
 logger = logging.getLogger(__name__)
 
 
-class COCODataset(JointsDataset):
-    '''
-    "keypoints": {
-        0: "nose",
-        1: "left_eye",
-        2: "right_eye",
-        3: "left_ear",
-        4: "right_ear",
-        5: "left_shoulder",
-        6: "right_shoulder",
-        7: "left_elbow",
-        8: "right_elbow",
-        9: "left_wrist",
-        10: "right_wrist",
-        11: "left_hip",
-        12: "right_hip",
-        13: "left_knee",
-        14: "right_knee",
-        15: "left_ankle",
-        16: "right_ankle"
-    },
-	"skeleton": [
-        [16,14],[14,12],[17,15],[15,13],[12,13],[6,12],[7,13], [6,7],[6,8],
-        [7,9],[8,10],[9,11],[2,3],[1,2],[1,3],[2,4],[3,5],[4,6],[5,7]]
-    '''
+class ControlNetDataset(JointsDataset):
+
     def __init__(self, cfg, root, image_set, is_train, transform=None, pseudo_anno=None):
         super().__init__(cfg, root, image_set, is_train, transform)
 
@@ -76,10 +46,6 @@ class COCODataset(JointsDataset):
             16: 'rank',
         }
 
-        if self.image_set == 'train':
-            self.image_set = 'train2017'
-        if self.image_set in ['val','validation']:
-            self.image_set = 'val2017'
         self.nms_thre = cfg.TEST.NMS_THRE
         self.image_thre = cfg.TEST.IMAGE_THRE
         self.oks_thre = cfg.TEST.OKS_THRE
@@ -143,14 +109,10 @@ class COCODataset(JointsDataset):
         self.u2a_mapping = super().get_mapping()
         super().do_mapping()
 
-        logger.info('=> load {} samples'.format(len(self.db)))
+        logger.info('=> load controlnet {} samples'.format(len(self.db)))
 
     def _get_ann_file_keypoint(self):
-        """ self.root / annotations / person_keypoints_train2017.json """
-        prefix = 'person_keypoints' \
-            if ('test' not in self.image_set) and ('unlabeled' not in self.image_set)   else 'image_info'
-        return os.path.join(self.root,'coco', 'annotations',
-                            prefix + '_' + self.image_set + '.json')
+        return os.path.join(self.root, 'controlnet_1k', 'annotations', 'person_keypoints_coco_controlnet1k.json')
 
     def _load_image_set_index(self):
         """ image id: int """
@@ -199,7 +161,7 @@ class COCODataset(JointsDataset):
             y1 = np.max((0, y))
             x2 = np.min((width - 1, x1 + np.max((0, w - 1))))
             y2 = np.min((height - 1, y1 + np.max((0, h - 1))))
-            if obj['area'] > 0 and x2 >= x1 and y2 >= y1:
+            if x2 >= x1 and y2 >= y1:
                 # obj['clean_bbox'] = [x1, y1, x2, y2]
                 obj['clean_bbox'] = [x1, y1, x2-x1, y2-y1]
 
@@ -244,6 +206,7 @@ class COCODataset(JointsDataset):
                 'bbox': obj['point_bbox'],
                 'raw_box': raw_box,
             })
+
         return rec
 
     def _box2cs(self, box):
@@ -278,7 +241,7 @@ class COCODataset(JointsDataset):
         data_name = prefix + '.zip@/' + prefix  if self.data_format == 'zip' else prefix
 
         image_path = os.path.join(
-            self.root,'coco', 'images', data_name, file_name)
+            self.root,'controlnet_1k', 'images', data_name, file_name)
 
         return image_path
 

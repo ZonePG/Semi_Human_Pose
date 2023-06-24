@@ -193,6 +193,7 @@ class JointsDataset(Dataset):
         else:
             data_numpy = cv2.imread(
                 image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
+        # cv2.imwrite('1.jpg', data_numpy)
 
         if data_numpy is None:
             logger.error('=> fail to read {}'.format(image_file))
@@ -265,7 +266,8 @@ class JointsDataset(Dataset):
             trans,
             (int(self.image_size[0]), int(self.image_size[1])),
             flags=cv2.INTER_LINEAR)
-
+        # cv2.imwrite('2.jpg', input)
+        # input_plot = input.copy()
         if self.transform:
             input = self.transform(input)
 
@@ -283,6 +285,12 @@ class JointsDataset(Dataset):
             for i in range(4):
                 bbox[i] = affine_transform(bbox[i], trans)      
             bbox = bbox.astype(np.int32)
+
+
+        # for point in bbox:
+        #     cv2.circle(input_plot, (point[0], point[1]), 1, (0, 0, 255), 4)
+
+        # cv2.imwrite("write.jpg", input_plot)
 
 
         target, target_weight = self.generate_target(joints, joints_vis)

@@ -73,7 +73,7 @@ def train(config, train_loader, model, criterion, optimizer, epoch,
                
 
         # Get the supervised samples
-        if config.MODEL.NAME in ['pose_dual','pose_cons']:
+        if config.MODEL.NAME in ['pose_dual','pose_cons', 'pose_dual_coco_gc_controlnet']:
             if type(target)==list:
                 input, target, target_weight, meta = [input[0], target[0], target_weight[0], meta[0]]
             output = output[0]
@@ -147,7 +147,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
         end = time.time()
         for i, (input, target, target_weight, meta) in enumerate(val_loader):
             # compute output
-            if config.MODEL.NAME in ['pose_dual']:
+            if config.MODEL.NAME in ['pose_dual', 'pose_dual_coco_gc_controlnet']:
                 output_list = model(input)
                 output = output_list[0]
                 output_2 = output_list[1]
@@ -160,7 +160,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
                 input_flipped = np.flip(input.cpu().numpy(), 3).copy()
                 input_flipped = torch.from_numpy(input_flipped).cuda()
                 output_flipped = model(input_flipped)
-                if config.MODEL.NAME in ['pose_dual']:
+                if config.MODEL.NAME in ['pose_dual', 'pose_dual_coco_gc_controlnet']:
                     output_flipped_2 = output_flipped[1]
                     output_flipped = output_flipped[0]
                     
@@ -188,7 +188,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
                 output = (output + output_flipped) * 0.5
                 # output = output_flipped
 
-                if config.MODEL.NAME in ['pose_dual']:
+                if config.MODEL.NAME in ['pose_dual', 'pose_dual_coco_gc_controlnet']:
                     output_flipped_2 = flip_back(output_flipped_2.cpu().numpy(),
                                             val_dataset.flip_pairs)
                     output_flipped_2 = torch.from_numpy(output_flipped_2.copy()).cuda()
@@ -241,7 +241,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
             preds, maxvals = get_final_preds(
                 config, output.clone().cpu().numpy(), c, s, r, hm_type)
 
-            if config.MODEL.NAME in ['pose_dual']:
+            if config.MODEL.NAME in ['pose_dual', 'pose_dual_coco_gc_controlnet']:
                 preds_2, maxvals_2 = get_final_preds(
                         config, output_2.clone().cpu().numpy(), c, s, r, hm_type)
                 all_preds_2[idx:idx + num_images, :, 0:2] = preds_2[:, :, 0:2]
@@ -310,7 +310,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
         else:
             _print_name_value(name_values, full_arch_name)
 
-        if config.MODEL.NAME in ['pose_dual']:
+        if config.MODEL.NAME in ['pose_dual', 'pose_dual_coco_gc_controlnet']:
             name_values_2, perf_indicator_2 = val_dataset.evaluate(
                 config, all_preds_2, output_dir, all_boxes, image_path,
                 'head2_pred.mat', imgnums, prefix = 'eval_2')

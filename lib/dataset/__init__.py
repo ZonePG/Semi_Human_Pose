@@ -15,3 +15,5 @@ from .ai_challenger import AIDataset as ai_challenger
 
 from .mix_coco_coco import Mixed_COCO_COCO_Dataset as mix_coco_coco
 from .mix_mpii_ai import Mixed_MPII_AI_Dataset as mix_mpii_ai
+from .mix_coco_controlnet import Mixed_COCO_ControlNet_Dataset as mix_coco_controlnet
+from .mix_coco_gc_contronet import Mixed_COCO_GC_ControlNet_Dataset as mix_coco_gc_controlnet
